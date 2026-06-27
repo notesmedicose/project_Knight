@@ -14,8 +14,22 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            def ksProps = new Properties()
+            def ksFile = file('keystore.properties')
+            if (ksFile.exists()) {
+                ksProps.load(new FileInputStream(ksFile))
+            }
+            storeFile file('knight-chess-release.keystore')
+            storePassword ksProps.getProperty('KEYSTORE_PASSWORD') ?: System.getenv('KEYSTORE_PASSWORD') ?: ''
+            keyAlias ksProps.getProperty('KEY_ALIAS') ?: System.getenv('KEY_ALIAS') ?: 'knight-chess'
+            keyPassword ksProps.getProperty('KEY_PASSWORD') ?: System.getenv('KEY_PASSWORD') ?: ''
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -23,15 +37,6 @@ android {
         debug {
             minifyEnabled false
             debuggable true
-        }
-    }
-    signingConfigs {
-        release {
-            // TODO: Replace with your actual keystore before Play Store upload
-            // storeFile file('knight-chess-release.keystore')
-            // storePassword System.getenv("KEYSTORE_PASSWORD")
-            // keyAlias System.getenv("KEY_ALIAS")
-            // keyPassword System.getenv("KEY_PASSWORD")
         }
     }
     buildFeatures {

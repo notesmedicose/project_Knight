@@ -27,13 +27,3 @@
   ],
   "configuration_version": "1"
 }
-
-{
-  "appId": "com.knightchess.game",
-  "appName": "Knight 3D Chess",
-  "plugins": {
-    "AdMob": {
-      "appId": "ca-app-pub-6924423095909700~4384363489"
-    }
-  }
-}
