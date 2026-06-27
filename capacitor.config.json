@@ -1,0 +1,14 @@
+{
+  "appId": "com.knightchess.game",
+  "appName": "Knight 3D Chess",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "AdMob": {
+      "appId": "ca-app-pub-3940256099942544~3347511713"
+    }
+  }
+}

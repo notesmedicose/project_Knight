@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Knight 3D Chess - Pro Game Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- 3D WebGL Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Main Menu Screen -->
+    <div id="main-menu" class="overlay-screen active">
+      <div class="glass-panel menu-panel">
+        <div class="logo-container">
+          <div class="chess-icon">♚</div>
+          <h1 class="title">KNIGHT 3D</h1>
+          <p class="subtitle">Procedural 3D Mobile Chess</p>
+        </div>
+
+        <div class="menu-actions">
+          <button id="btn-mode-bot" class="btn btn-primary">
+            <span class="btn-icon">🤖</span> Play vs Bot
+          </button>
+          <button id="btn-mode-friend" class="btn btn-secondary">
+            <span class="btn-icon">👥</span> Pass & Play (Friend)
+          </button>
+        </div>
+
+        <!-- Bot Difficulty Selection Modal embedded in menu -->
+        <div id="bot-difficulty-selector" class="difficulty-box hidden">
+          <h3>Select AI Difficulty</h3>
+          <div class="difficulty-buttons">
+            <button class="btn-diff" data-diff="easy">Easy (Beginner)</button>
+            <button class="btn-diff active" data-diff="medium">Medium (Challenger)</button>
+            <button class="btn-diff" data-diff="hard">Hard (Master)</button>
+          </div>
+          <button id="btn-start-bot-game" class="btn btn-accent">Start Game</button>
+        </div>
+
+        <div class="menu-footer">
+          <span class="tag">100% Offline Game</span>
+          <span class="tag">No Account Needed</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- In-Game HUD Overlay -->
+    <div id="game-hud" class="hud-layer hidden">
+      <!-- Top Bar: Turn info & captured pieces -->
+      <div class="hud-top-bar glass-pill">
+        <div id="player-black-info" class="player-info">
+          <span class="player-avatar">🏿</span>
+          <span class="player-name" id="name-black">Black (Bot)</span>
+          <div id="captured-by-black" class="captured-pieces"></div>
+        </div>
+
+        <div class="turn-status-container">
+          <span id="turn-indicator" class="turn-badge white-turn">White's Turn</span>
+          <span id="game-state-message" class="game-msg"></span>
+        </div>
+
+        <div id="player-white-info" class="player-info">
+          <span class="player-avatar">🏻</span>
+          <span class="player-name" id="name-white">White (You)</span>
+          <div id="captured-by-white" class="captured-pieces"></div>
+        </div>
+      </div>
+
+      <!-- Quick Action Floating Buttons -->
+      <div class="hud-controls glass-pill">
+        <button id="btn-hud-menu" class="hud-btn" title="Main Menu">🏠</button>
+        <button id="btn-hud-undo" class="hud-btn" title="Undo Move">↩️</button>
+        <button id="btn-hud-reset" class="hud-btn" title="Restart Game">🔄</button>
+        <button id="btn-hud-camera" class="hud-btn" title="Reset Camera View">🎥</button>
+        <button id="btn-hud-sound" class="hud-btn" title="Toggle Sound">🔊</button>
+      </div>
+    </div>
+
+    <!-- Pawn Promotion Modal -->
+    <div id="promotion-modal" class="modal-overlay hidden">
+      <div class="glass-panel modal-panel">
+        <h2>Promote Pawn</h2>
+        <p>Choose piece to transform into:</p>
+        <div class="promotion-options">
+          <button class="promo-btn" data-piece="q">♛ Queen</button>
+          <button class="promo-btn" data-piece="r">♜ Rook</button>
+          <button class="promo-btn" data-piece="b">♝ Bishop</button>
+          <button class="promo-btn" data-piece="n">♞ Knight</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="game-over-modal" class="modal-overlay hidden">
+      <div class="glass-panel modal-panel">
+        <h2 id="game-over-title">Checkmate!</h2>
+        <p id="game-over-result">White Wins!</p>
+        <div class="modal-actions">
+          <button id="btn-restart-game" class="btn btn-primary">Play Again</button>
+          <button id="btn-return-menu" class="btn btn-secondary">Main Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side AdMob Banner Containers (Dedicated Left & Right Skyscraper Ad Spaces) -->
+    <div id="admob-banner-left" class="admob-side-banner side-left">
+      <div class="admob-placeholder-vertical">
+        <span class="ad-label">ADVERTISEMENT</span>
+        <span class="ad-spec">AdMob Skyscraper Ad</span>
+      </div>
+    </div>
+
+    <div id="admob-banner-right" class="admob-side-banner side-right">
+      <div class="admob-placeholder-vertical">
+        <span class="ad-label">ADVERTISEMENT</span>
+        <span class="ad-spec">AdMob Skyscraper Ad</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
