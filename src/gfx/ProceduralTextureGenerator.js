@@ -412,9 +412,8 @@ export class ProceduralTextureGenerator {
   // ─── Brushed Gold Metal Texture (Accents) ────────────────────
 
   /**
-   * Generate brushed gold metal texture with directional streaks
-   * 
-   * @returns {{ map: THREE.CanvasTexture, roughnessMap: THREE.CanvasTexture, metalnessMap: THREE.CanvasTexture, bumpMap: THREE.CanvasTexture }}
+   * Generate antique brushed gold with RADIAL micro scratches
+   * Spec: "Radial micro scratches" on antique gold, roughness 0.22, metalness 1.0
    */
   generateBrushedGold(name = 'gold') {
     const canvas = this.createCanvas();
@@ -422,23 +421,27 @@ export class ProceduralTextureGenerator {
     const imageData = ctx.createImageData(this.res, this.res);
     const data = imageData.data;
 
-    const base = { r: 212, g: 175, b: 55 };
-    const highlight = { r: 240, g: 210, b: 100 };
-    const dark = { r: 160, g: 130, b: 30 };
+    // Antique gold: deeper warmer tones per spec
+    const base = { r: 200, g: 165, b: 50 };
+    const highlight = { r: 235, g: 205, b: 95 };
+    const dark = { r: 150, g: 120, b: 25 };
+    const cx = 0.5, cy = 0.5;
 
     for (let y = 0; y < this.res; y++) {
       for (let x = 0; x < this.res; x++) {
         const nx = x / this.res;
         const ny = y / this.res;
+        const dx = nx - cx;
+        const dy = ny - cy;
+        const angle = Math.atan2(dy, dx);
+        const radius = Math.sqrt(dx * dx + dy * dy);
 
-        // Directional brush streaks — stretched noise along Y
-        const brush = this.fbm(nx * 2, ny * 80, 2) * 0.5 + 0.5;
-        const microBrush = this.fbm(nx * 4, ny * 150, 1) * 0.3;
-
-        // Subtle grain
-        const grain = this.fbm(nx * 30, ny * 30, 1) * 0.08;
-
-        const metalVal = brush + microBrush + grain;
+        // Radial brush streaks — concentric circles (spec: radial scratches)
+        const radialBrush = this.fbm(angle * 8 / Math.PI, radius * 60, 2) * 0.5 + 0.5;
+        const microScratches = this.fbm(angle * 20 / Math.PI, radius * 120, 1) * 0.2;
+        const grain = this.fbm(nx * 40, ny * 40, 1) * 0.06;
+        const edgeDark = 1.0 - radius * 0.12;
+        const metalVal = (radialBrush + microScratches + grain) * edgeDark;
 
         const idx = (y * this.res + x) * 4;
         data[idx]     = this.clamp(dark.r + (highlight.r - dark.r) * metalVal);
@@ -452,7 +455,7 @@ export class ProceduralTextureGenerator {
     const tex = this.createTexture(canvas);
     tex.name = name;
 
-    // Roughness map — smoother in brush direction
+    // Roughness map — radial pattern, spec avg 0.22
     const roughCanvas = this.createCanvas();
     const rCtx = roughCanvas.getContext('2d');
     const rData = rCtx.createImageData(this.res, this.res);
@@ -461,8 +464,12 @@ export class ProceduralTextureGenerator {
       for (let x = 0; x < this.res; x++) {
         const nx = x / this.res;
         const ny = y / this.res;
-        const brush = this.fbm(nx * 2, ny * 80, 2);
-        const roughness = 0.15 + brush * 0.25;
+        const dx = nx - cx;
+        const dy = ny - cy;
+        const angle = Math.atan2(dy, dx);
+        const radius = Math.sqrt(dx * dx + dy * dy);
+        const brush = this.fbm(angle * 8 / Math.PI, radius * 60, 2);
+        const roughness = 0.18 + brush * 0.10;
         const idx = (y * this.res + x) * 4;
         rd[idx] = rd[idx + 1] = rd[idx + 2] = this.clamp(roughness * 255);
         rd[idx + 3] = 255;
@@ -472,7 +479,7 @@ export class ProceduralTextureGenerator {
     const roughnessMap = this.createTexture(roughCanvas);
     roughnessMap.name = name + '_roughness';
 
-    // Metalness map — fully metallic (white)
+    // Metalness map — fully metallic 1.0 per spec
     const metalCanvas = this.createCanvas();
     const mCtx = metalCanvas.getContext('2d');
     const mData = mCtx.createImageData(this.res, this.res);
@@ -485,7 +492,7 @@ export class ProceduralTextureGenerator {
     const metalnessMap = this.createTexture(metalCanvas);
     metalnessMap.name = name + '_metalness';
 
-    // Bump map
+    // Bump map — radial micro scratches relief
     const bumpCanvas = this.createCanvas();
     const bCtx = bumpCanvas.getContext('2d');
     const bData = bCtx.createImageData(this.res, this.res);
@@ -494,8 +501,12 @@ export class ProceduralTextureGenerator {
       for (let x = 0; x < this.res; x++) {
         const nx = x / this.res;
         const ny = y / this.res;
-        const brush = this.fbm(nx * 2, ny * 80, 2);
-        const height = brush * 60;
+        const dx = nx - cx;
+        const dy = ny - cy;
+        const angle = Math.atan2(dy, dx);
+        const radius = Math.sqrt(dx * dx + dy * dy);
+        const brush = this.fbm(angle * 8 / Math.PI, radius * 60, 2);
+        const height = brush * 40;
         const idx = (y * this.res + x) * 4;
         bd[idx] = bd[idx + 1] = bd[idx + 2] = this.clamp(128 + height);
         bd[idx + 3] = 255;
@@ -506,6 +517,76 @@ export class ProceduralTextureGenerator {
     bumpMap.name = name + '_bump';
 
     return { map: tex, roughnessMap, metalnessMap, bumpMap };
+  }
+
+
+  // ─── Alternating Direction Wood Grain (per spec) ─────────────
+
+  /**
+   * Generate wood grain with alternating direction (90° rotation per spec)
+   * Spec: "Direction alternating every square", "Never tile textures", "unique grain"
+   */
+  generateWoodGrainAlt(baseColor, grainColor, grainFreq = 14, seedX = 0, seedY = 0, rotate = false, name = 'wood_alt') {
+    const canvas = this.createCanvas();
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.createImageData(this.res, this.res);
+    const data = imageData.data;
+    const base = this.hexToRgb(baseColor);
+    const grain = this.hexToRgb(grainColor);
+    const sX = seedX * 1000;
+    const sY = seedY * 1000;
+    for (let y = 0; y < this.res; y++) {
+      for (let x = 0; x < this.res; x++) {
+        let nx = x / this.res, ny = y / this.res;
+        if (rotate) { const t = nx; nx = ny; ny = t; }
+        const ux = nx + sX, uy = ny + sY;
+        const g1 = Math.sin(uy * grainFreq * Math.PI + this.fbm(ux*4, uy*2, 3)*2.5) * 0.5 + 0.5;
+        const g2 = Math.sin(uy * grainFreq*2.7 * Math.PI + this.fbm(ux*8, uy*4, 2)*3) * 0.5 + 0.5;
+        const micro = this.fbm(ux * 20, uy * 10, 1) * 0.15;
+        const grainVal = g1 * 0.65 + g2 * 0.25 + micro;
+        const kx = 0.2 + this.hash(42 + sX, 0) * 0.6;
+        const ky = 0.2 + this.hash(0, 42 + sY) * 0.6;
+        const ki = Math.max(0, 1 - Math.sqrt((nx-kx)**2 + (ny-ky)**2*3) * 5) * 0.25;
+        const fg = grainVal * (1 - ki) + grainVal * ki;
+        const idx = (y*this.res + x) * 4;
+        data[idx] = this.clamp(base.r + (grain.r - base.r) * fg);
+        data[idx+1] = this.clamp(base.g + (grain.g - base.g) * fg);
+        data[idx+2] = this.clamp(base.b + (grain.b - base.b) * fg);
+        data[idx+3] = 255;
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+    const tex = this.createTexture(canvas);
+    tex.name = name;
+    return tex;
+  }
+
+  generateWoodBumpAlt(baseColor, grainColor, grainFreq = 14, seedX = 0, seedY = 0, rotate = false, name = 'wood_bump_alt') {
+    const canvas = this.createCanvas();
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.createImageData(this.res, this.res);
+    const data = imageData.data;
+    const base = this.hexToRgb(baseColor);
+    const grain = this.hexToRgb(grainColor);
+    const sX = seedX * 1000;
+    const sY = seedY * 1000;
+    for (let y = 0; y < this.res; y++) {
+      for (let x = 0; x < this.res; x++) {
+        let nx = x / this.res, ny = y / this.res;
+        if (rotate) { const t = nx; nx = ny; ny = t; }
+        const ux = nx + sX, uy = ny + sY;
+        const g1 = Math.sin(uy * grainFreq * Math.PI + this.fbm(ux*4, uy*2, 3)*2.5) * 0.5 + 0.5;
+        const g2 = Math.sin(uy * grainFreq*2.7 * Math.PI + this.fbm(ux*8, uy*4, 2)*3) * 0.5 + 0.5;
+        const height = (g1 * 0.6 + g2 * 0.25 + this.fbm(ux*25, uy*15, 1)*0.2) * 255;
+        const idx = (y*this.res + x) * 4;
+        data[idx] = data[idx+1] = data[idx+2] = this.clamp(height);
+        data[idx+3] = 255;
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+    const tex = this.createTexture(canvas);
+    tex.name = name;
+    return tex;
   }
 
   // ─── Mahogany Frame Texture ──────────────────────────────────

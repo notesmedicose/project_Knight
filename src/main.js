@@ -84,43 +84,74 @@ class GameApp {
     });
 
     // HUD Actions
-    this.ui.btnHudMenu.addEventListener('click', () => {
+    this.ui.btnHudMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.sound.playMove();
+      this.board3D.setSelectedSquare(null);
+      this.board3D.clearHighlights();
       this.ui.showMainMenu();
     });
 
-    this.ui.btnHudReset.addEventListener('click', () => {
+    this.ui.btnHudReset.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.sound.playMove();
       this.startNewGame(this.gameMode);
     });
 
-    this.ui.btnHudUndo.addEventListener('click', () => {
+    this.ui.btnHudUndo.addEventListener('click', (e) => {
+      e.stopPropagation();
       if (this.isAnimating) return;
-      this.engine.undo();
+
+      // Hide game over modal if open
+      this.ui.gameOverModal.classList.add('hidden');
+
+      const history = this.engine.history();
+      if (history.length === 0) return;
+
       if (this.gameMode === 'bot') {
-        this.engine.undo(); // undo bot move as well
+        // In bot mode, if it's white's turn, undo bot move and player move
+        if (this.engine.turn() === 'w' && history.length >= 2) {
+          this.engine.undo();
+          this.engine.undo();
+        } else {
+          this.engine.undo();
+        }
+      } else {
+        this.engine.undo();
       }
+
+      this.sound.playMove();
       this.board3D.setSelectedSquare(null);
       this.board3D.clearHighlights();
       this.board3D.syncBoardState(this.engine.getBoard());
+      this.board3D.updateTurnLights(this.engine.turn());
       this.ui.updateTurn(this.engine.turn(), this.engine.inCheck());
       this.ui.updateCapturedPieces(this.engine.history());
     });
 
-    this.ui.btnHudCamera.addEventListener('click', () => {
-      const perspective = (this.gameMode === 'friend' && this.engine.turn() === 'b') ? 'b' : 'w';
-      this.sceneMgr.resetCameraView(perspective);
+    this.ui.btnHudCamera.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.sound.playMove();
+      this.sceneMgr.toggleCameraView();
     });
 
-    this.ui.btnHudSound.addEventListener('click', () => {
+    this.ui.btnHudSound.addEventListener('click', (e) => {
+      e.stopPropagation();
       const enabled = this.sound.toggleSound();
       this.ui.btnHudSound.textContent = enabled ? '🔊' : '🔇';
+      this.ui.btnHudSound.style.opacity = enabled ? '1.0' : '0.5';
     });
 
     // Modal Actions
-    this.ui.btnRestartGame.addEventListener('click', () => {
+    this.ui.btnRestartGame.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.sound.playMove();
       this.startNewGame(this.gameMode);
     });
 
-    this.ui.btnReturnMenu.addEventListener('click', () => {
+    this.ui.btnReturnMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.sound.playMove();
       this.ui.showMainMenu();
     });
   }

@@ -126,7 +126,7 @@ export class ChessBoard3D {
     const tableTopGeom = new THREE.BoxGeometry(18.0, 0.6, 18.0);
     const tableTopMat = new THREE.MeshStandardMaterial({
       color: 0x3d2314, // Rich polished mahogany wood
-      roughness: 0.3,
+      roughness: 0.26,
       metalness: 0.1,
       clearcoat: 0.2
     });
@@ -155,8 +155,8 @@ export class ChessBoard3D {
     const frameGeom = new THREE.BoxGeometry(9.4, 0.4, 9.4);
     this.frameMat = new THREE.MeshStandardMaterial({
       color: 0x2b170c, // Deep rich walnut wood
-      roughness: 0.25,
-      metalness: 0.05,
+      roughness: 0.33,
+      metalness: 0.0,
       clearcoat: 0.5
     });
     const frameMesh = new THREE.Mesh(frameGeom, this.frameMat);
@@ -189,7 +189,7 @@ export class ChessBoard3D {
       clearcoat: 0.3
     });
 
-    const tileGeom = new THREE.BoxGeometry(this.tileSize * 0.98, 0.1, this.tileSize * 0.98);
+    const tileGeom = new THREE.BoxGeometry(this.tileSize, 0.1, this.tileSize * 0.98);
 
     for (let rank = 0; rank < 8; rank++) {
       for (let file = 0; file < 8; file++) {

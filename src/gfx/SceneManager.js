@@ -19,6 +19,8 @@ export class SceneManager {
       0.1,
       1000
     );
+    // Camera Modes: 0 = 3D White Perspective, 1 = Top-Down Aerial, 2 = 3D Black Perspective
+    this.cameraMode = 0;
     this.resetCameraView('w');
 
     // Renderer
@@ -71,13 +73,33 @@ export class SceneManager {
   }
 
   resetCameraView(perspective = 'w') {
-    // Elegant 3D angled camera perspective matching the reference photo layout
-    const targetZ = perspective === 'w' ? 8.5 : -8.5;
-    const targetY = 7.2;
-    const targetX = 0;
+    if (perspective === 'b') {
+      this.cameraMode = 2;
+      this.camera.position.set(0, 7.2, -8.5);
+      this.camera.lookAt(0, 0.3, 0);
+    } else {
+      this.cameraMode = 0;
+      this.camera.position.set(0, 7.2, 8.5);
+      this.camera.lookAt(0, 0.3, 0);
+    }
+  }
 
-    this.camera.position.set(targetX, targetY, targetZ);
-    this.camera.lookAt(0, 0.3, 0);
+  toggleCameraView() {
+    this.cameraMode = (this.cameraMode + 1) % 3;
+    if (this.cameraMode === 0) {
+      // 3D Angled White View
+      this.camera.position.set(0, 7.2, 8.5);
+      this.camera.lookAt(0, 0.3, 0);
+    } else if (this.cameraMode === 1) {
+      // Top-Down Aerial 2D View
+      this.camera.position.set(0, 11.2, 0.01);
+      this.camera.lookAt(0, 0, 0);
+    } else {
+      // 3D Angled Black View
+      this.camera.position.set(0, 7.2, -8.5);
+      this.camera.lookAt(0, 0.3, 0);
+    }
+    return this.cameraMode;
   }
 
   onWindowResize() {

@@ -22,6 +22,9 @@ export class SoundManager {
 
   toggleSound() {
     this.enabled = !this.enabled;
+    if (this.enabled) {
+      this.playMove();
+    }
     return this.enabled;
   }
 
