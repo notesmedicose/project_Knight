@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --bg-dark: #090c10;
   --panel-bg: rgba(18, 24, 38, 0.75);
   --panel-border: rgba(255, 255, 255, 0.12);
@@ -363,12 +363,13 @@ body, html {
 .hud-controls {
   pointer-events: auto;
   position: absolute;
-  right: 190px;
-  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 12px;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 10px 8px;
+  flex-direction: row;
+  gap: 6px;
+  padding: 8px 6px;
   z-index: 60;
 }
 
@@ -463,60 +464,11 @@ body, html {
   gap: 10px;
 }
 
-/* Side AdMob Banner Rectangles (Matching User's Markup Boxes) */
-.admob-side-banner {
-  position: absolute;
-  top: 16px;
-  bottom: 16px;
-  width: 160px;
-  z-index: 50;
-  background: rgba(2, 6, 23, 0.75);
-  backdrop-filter: blur(12px);
-  border: 2px dashed rgba(6, 182, 212, 0.4);
-  border-radius: var(--radius-md);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
+/* AdMob uses adaptive bottom banner via Capacitor plugin */
 
-.admob-side-banner.side-left {
-  left: 16px;
-}
-
-.admob-side-banner.side-right {
-  right: 16px;
-}
-
-.admob-placeholder-vertical {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 12px;
-  gap: 8px;
-}
-
-.ad-label {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  color: var(--accent-cyan);
-  background: rgba(6, 182, 212, 0.15);
-  padding: 3px 8px;
-  border-radius: 4px;
-}
-
-.ad-spec {
-  font-size: 11px;
-  color: var(--text-secondary);
-  line-height: 1.4;
-}
-
-/* ════════════════════════════════════════
-   TALKING TOM — The Chess Mascot!
-   ════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   TALKING TOM â€” The Chess Mascot!
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* Main container: bottom-center fixed position */
 .tom-container {
@@ -738,3 +690,6 @@ body, html {
 @media (max-width: 600px) {
   .exit-toast { bottom: 70px; font-size: 12px; padding: 8px 18px; }
 }
+
+
+

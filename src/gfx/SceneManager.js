@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+﻿import * as THREE from 'three';
 
 /**
  * SceneManager handles Three.js setup: Scene, Camera, Lighting, Renderer, Raycasting.
@@ -26,11 +26,12 @@ export class SceneManager {
     // Renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.2 : 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.2;
+    this.renderer.toneMappingExposure = isMobile ? 0.8 : 1.2;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     this.container.appendChild(this.renderer.domElement);
@@ -60,8 +61,8 @@ export class SceneManager {
     const keyLight = new THREE.DirectionalLight(0xfffaed, 1.5);
     keyLight.position.set(5, 15, 7);
     keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 2048;
-    keyLight.shadow.mapSize.height = 2048;
+    keyLight.shadow.mapSize.width = isMobile ? 512 : 2048;
+    keyLight.shadow.mapSize.height = isMobile ? 512 : 2048;
     keyLight.shadow.camera.near = 0.5;
     keyLight.shadow.camera.far = 35;
     keyLight.shadow.camera.left = -8;
@@ -132,3 +133,8 @@ export class SceneManager {
     this.renderer.render(this.scene, this.camera);
   }
 }
+
+
+
+
+

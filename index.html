@@ -1,43 +1,40 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Knight 3D Chess - Pro Game Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#090c10">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/src/style.css" />
+  <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
   <div id="app">
-    <!-- 3D WebGL Canvas Container -->
     <div id="canvas-container"></div>
 
     <!-- Main Menu Screen -->
     <div id="main-menu" class="overlay-screen active">
       <div class="glass-panel menu-panel">
         <div class="logo-container">
-          <div class="chess-icon">♚</div>
+          <div class="chess-icon">&#9818;</div>
           <h1 class="title">KNIGHT 3D</h1>
           <p class="subtitle">Procedural 3D Mobile Chess</p>
         </div>
 
         <div class="menu-actions">
           <button id="btn-mode-bot" class="btn btn-primary">
-            <span class="btn-icon">🤖</span> Play vs Bot
+            <span class="btn-icon">&#129302;</span> Play vs Bot
           </button>
           <button id="btn-mode-friend" class="btn btn-secondary">
-            <span class="btn-icon">👥</span> Pass & Play (Friend)
+            <span class="btn-icon">&#128101;</span> Pass &amp; Play
           </button>
         </div>
 
-        <!-- Bot Difficulty & Side Selection Modal embedded in menu -->
         <div id="bot-difficulty-selector" class="difficulty-box hidden">
           <h3>Select AI Difficulty</h3>
           <div class="difficulty-buttons">
@@ -46,13 +43,13 @@
             <button class="btn-diff" data-diff="hard">Hard (Master)</button>
           </div>
 
-          <h3 style="margin-top: 6px;">Choose Your Side</h3>
+          <h3 style="margin-top:6px">Choose Your Side</h3>
           <div class="side-buttons">
-            <button class="btn-side active" data-side="w">♔ White (Move 1st)</button>
-            <button class="btn-side" data-side="b">♚ Black (Move 2nd)</button>
+            <button class="btn-side active" data-side="w">&#9812; White (Move 1st)</button>
+            <button class="btn-side" data-side="b">&#9818; Black (Move 2nd)</button>
           </div>
 
-          <button id="btn-start-bot-game" class="btn btn-accent" style="margin-top: 6px;">Start Game</button>
+          <button id="btn-start-bot-game" class="btn btn-accent" style="margin-top:6px">Start Game</button>
         </div>
 
         <div class="menu-footer">
@@ -60,18 +57,15 @@
           <span class="tag">No Account Needed</span>
         </div>
 
-        <button id="btn-privacy-policy" class="btn btn-ghost" style="margin-top: 4px; font-size: 11px;">
-          📜 Privacy Policy
-        </button>
+        <button id="btn-privacy-policy" class="btn btn-ghost" style="margin-top:4px;font-size:11px">&#128220; Privacy Policy</button>
       </div>
     </div>
 
     <!-- In-Game HUD Overlay -->
     <div id="game-hud" class="hud-layer hidden">
-      <!-- Top Bar: Turn info & captured pieces -->
       <div class="hud-top-bar glass-pill">
         <div id="player-black-info" class="player-info">
-          <span class="player-avatar">🏿</span>
+          <span class="player-avatar">&#127995;</span>
           <span class="player-name" id="name-black">Black (Bot)</span>
           <div id="captured-by-black" class="captured-pieces"></div>
         </div>
@@ -82,19 +76,18 @@
         </div>
 
         <div id="player-white-info" class="player-info">
-          <span class="player-avatar">🏻</span>
+          <span class="player-avatar">&#127998;</span>
           <span class="player-name" id="name-white">White (You)</span>
           <div id="captured-by-white" class="captured-pieces"></div>
         </div>
       </div>
 
-      <!-- Quick Action Floating Buttons -->
       <div class="hud-controls glass-pill">
-        <button id="btn-hud-menu" class="hud-btn" title="Main Menu">🏠</button>
-        <button id="btn-hud-undo" class="hud-btn" title="Undo Move">↩️</button>
-        <button id="btn-hud-reset" class="hud-btn" title="Restart Game">🔄</button>
-        <button id="btn-hud-camera" class="hud-btn" title="Reset Camera View">🎥</button>
-        <button id="btn-hud-sound" class="hud-btn" title="Toggle Sound">🔊</button>
+        <button id="btn-hud-menu" class="hud-btn" title="Main Menu">&#127968;</button>
+        <button id="btn-hud-undo" class="hud-btn" title="Undo Move">&#8617;</button>
+        <button id="btn-hud-reset" class="hud-btn" title="Restart Game">&#128260;</button>
+        <button id="btn-hud-camera" class="hud-btn" title="Reset Camera">&#127916;</button>
+        <button id="btn-hud-sound" class="hud-btn" title="Toggle Sound">&#128266;</button>
       </div>
     </div>
 
@@ -104,10 +97,10 @@
         <h2>Promote Pawn</h2>
         <p>Choose piece to transform into:</p>
         <div class="promotion-options">
-          <button class="promo-btn" data-piece="q">♛ Queen</button>
-          <button class="promo-btn" data-piece="r">♜ Rook</button>
-          <button class="promo-btn" data-piece="b">♝ Bishop</button>
-          <button class="promo-btn" data-piece="n">♞ Knight</button>
+          <button class="promo-btn" data-piece="q">&#9819; Queen</button>
+          <button class="promo-btn" data-piece="r">&#9820; Rook</button>
+          <button class="promo-btn" data-piece="b">&#9821; Bishop</button>
+          <button class="promo-btn" data-piece="n">&#9822; Knight</button>
         </div>
       </div>
     </div>
@@ -127,7 +120,7 @@
     <!-- Privacy Policy Modal -->
     <div id="privacy-modal" class="modal-overlay hidden">
       <div class="glass-panel modal-panel privacy-panel">
-        <h2>📜 Privacy Policy</h2>
+        <h2>&#128220; Privacy Policy</h2>
         <div class="privacy-scroll">
           <p><strong>Last updated: June 2025</strong></p>
           <p>Knight 3D Chess is a <strong>100% offline game</strong>. We do <strong>NOT</strong> collect, store, or transmit any personal data.</p>
@@ -135,26 +128,12 @@
           <p><strong>AdMob Advertising:</strong> This app uses Google AdMob for banner ads. AdMob may collect anonymous device identifiers (Advertising ID) and general non-precise location data. You can reset your Advertising ID in your device settings.</p>
           <p><strong>Children:</strong> We do not knowingly collect data from children under 13.</p>
           <p><strong>No Analytics / Crash Reporting:</strong> No third-party analytics SDKs are used.</p>
-          <p>For full details, view our complete privacy policy at <a href="privacy.html" target="_blank" style="color: #06b6d4;">privacy.html</a> or see <a href="https://policies.google.com/privacy" target="_blank" style="color: #06b6d4;">Google's Privacy Policy</a>.</p>
+          <p>For full details, view our complete privacy policy at <a href="privacy.html" target="_blank" style="color:#06b6d4">privacy.html</a> or see <a href="https://policies.google.com/privacy" target="_blank" style="color:#06b6d4">Google's Privacy Policy</a>.</p>
         </div>
-        <button id="btn-privacy-close" class="btn btn-primary" style="margin-top: 12px;">I Understand</button>
+        <button id="btn-privacy-close" class="btn btn-primary" style="margin-top:12px">I Understand</button>
       </div>
     </div>
 
-    <!-- Side AdMob Banner Containers (Dedicated Left & Right Skyscraper Ad Spaces) -->
-    <div id="admob-banner-left" class="admob-side-banner side-left">
-      <div class="admob-placeholder-vertical">
-        <span class="ad-label">ADVERTISEMENT</span>
-        <span class="ad-spec">AdMob Skyscraper Ad</span>
-      </div>
-    </div>
-
-    <div id="admob-banner-right" class="admob-side-banner side-right">
-      <div class="admob-placeholder-vertical">
-        <span class="ad-label">ADVERTISEMENT</span>
-        <span class="ad-spec">AdMob Skyscraper Ad</span>
-      </div>
-    </div>
   </div>
 
   <script type="module" src="/src/main.js"></script>
