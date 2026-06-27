@@ -175,6 +175,34 @@ export class ChessBoard3D {
     brassMesh.position.y = -0.19;
     this.boardGroup.add(brassMesh);
 
+    // 4 Royal Golden Corner Ambient Sconces (Matching User's Green Corner Circles!)
+    const sconcePositions = [
+      [-4.4, 0.05, -4.4],
+      [4.4, 0.05, -4.4],
+      [-4.4, 0.05, 4.4],
+      [4.4, 0.05, 4.4]
+    ];
+    const sconceBaseGeom = new THREE.CylinderGeometry(0.18, 0.25, 0.12, 16);
+    const sconceGemGeom = new THREE.SphereGeometry(0.12, 16, 16);
+    const glowMat = new THREE.MeshStandardMaterial({
+      color: 0xffd175,
+      emissive: 0xffaa33,
+      emissiveIntensity: 0.8,
+      roughness: 0.1,
+      metalness: 0.9
+    });
+
+    sconcePositions.forEach(pos => {
+      const sconceGroup = new THREE.Group();
+      const baseMesh = new THREE.Mesh(sconceBaseGeom, this.brassMat);
+      const gemMesh = new THREE.Mesh(sconceGemGeom, glowMat);
+      gemMesh.position.y = 0.08;
+      sconceGroup.add(baseMesh);
+      sconceGroup.add(gemMesh);
+      sconceGroup.position.set(pos[0], pos[1], pos[2]);
+      this.boardGroup.add(sconceGroup);
+    });
+
     // Light and Dark Wood Inlaid Tile Materials (Matching Reference Photo!)
     this.lightTileMat = new THREE.MeshStandardMaterial({
       color: 0xdfb76c, // Golden Maple Wood

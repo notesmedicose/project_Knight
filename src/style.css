@@ -501,3 +501,204 @@ body, html {
   color: var(--text-secondary);
   line-height: 1.4;
 }
+
+/* ════════════════════════════════════════
+   TALKING TOM — The Chess Mascot!
+   ════════════════════════════════════════ */
+
+/* Main container: bottom-center fixed position */
+.tom-container {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+/* Avatar: clickable floating mascot */
+.tom-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4), 0 0 0 2px rgba(245, 158, 11, 0.2);
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  user-select: none;
+  position: relative;
+}
+
+.tom-avatar:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 30px rgba(245, 158, 11, 0.6), 0 0 0 3px rgba(245, 158, 11, 0.3);
+}
+
+.tom-avatar:active {
+  transform: scale(0.95);
+}
+
+/* Label below avatar */
+.tom-avatar-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 8px;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+/* Talking animation */
+.tom-talking {
+  animation: tomTalk 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes tomTalk {
+  0% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.05) translateY(-3px); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+/* Bounce animation */
+.tom-bounce {
+  animation: tomBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+@keyframes tomBounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.2); }
+  50% { transform: scale(0.9); }
+  70% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Speech bubble */
+.tom-speech {
+  position: relative;
+  max-width: 300px;
+  padding: 12px 18px;
+  border-radius: 16px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(245, 158, 11, 0.1);
+  pointer-events: auto;
+  margin-bottom: 4px;
+}
+
+/* Speech bubble arrow pointing down */
+.tom-speech::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid var(--panel-bg);
+}
+
+/* Hint mode: special styling for persistent hints */
+.tom-speech.tom-hint-mode {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 25px rgba(6, 182, 212, 0.15);
+}
+
+.tom-speech.tom-hint-mode::after {
+  border-top-color: var(--panel-bg);
+}
+
+/* Speech text */
+#tom-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.5;
+  text-align: center;
+  word-wrap: break-word;
+  margin: 0;
+  font-family: var(--font-main);
+}
+
+/* Hint button */
+.tom-hint-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.15));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(12px);
+  white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+}
+
+.tom-hint-btn:hover {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(217, 119, 6, 0.25));
+  transform: scale(1.05);
+  box-shadow: 0 6px 25px rgba(245, 158, 11, 0.35);
+}
+
+.tom-hint-btn:active {
+  transform: scale(0.95);
+}
+
+/* Bubble entrance animation */
+@keyframes bubbleIn {
+  0% { opacity: 0; transform: translateY(10px) scale(0.9); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes bubblePop {
+  0% { opacity: 0; transform: scale(0.5); }
+  70% { transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Responsive: smaller on mobile */
+@media (max-width: 600px) {
+  .tom-container {
+    bottom: 12px;
+  }
+  .tom-avatar {
+    width: 46px;
+    height: 46px;
+    font-size: 22px;
+  }
+  .tom-speech {
+    max-width: 260px;
+    padding: 10px 14px;
+  }
+  #tom-text {
+    font-size: 13px;
+  }
+  .tom-hint-btn {
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+}

@@ -55,24 +55,22 @@ export class PieceGenerator {
         clearcoat: 0.3,
       }),
 
-      // ─── Black Body → Ruby / Garnet Crystal ───────────────
+      // ─── Black Body → Imperial Black Obsidian / Ebony Marble ────────
       blackBody: new THREE.MeshPhysicalMaterial({
-        color: 0xcc0a1c,
-        emissive: 0x440000,
-        emissiveIntensity: 0.2,
-        roughness: 0.08,
-        metalness: 0.0,
+        color: 0x111114,
+        emissive: 0x040406,
+        emissiveIntensity: 0.1,
+        roughness: 0.12,
+        metalness: 0.05,
         clearcoat: 1.0,
         clearcoatRoughness: 0.05,
-        transparent: true,
-        opacity: 0.92,
-        transmission: 0.35,
-        thickness: 1.5,
-        ior: 1.8,
-        envMapIntensity: 1.5,
-        map: t?.ruby?.map || null,
-        bumpMap: t?.ruby?.bumpMap || null,
-        bumpScale: 0.04,
+        transparent: false,
+        opacity: 1.0,
+        transmission: 0.0,
+        envMapIntensity: 1.2,
+        map: t?.obsidian?.map || t?.marble?.map || null,
+        bumpMap: t?.obsidian?.bumpMap || t?.marble?.bumpMap || null,
+        bumpScale: 0.03,
       }),
 
       // ─── Black Accents → Gold (matching white accents, not silver) ──

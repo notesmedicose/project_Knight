@@ -47,13 +47,18 @@ export class SceneManager {
   }
 
   setupLighting() {
-    // Bright ambient light to ensure black pieces on dark tiles remain clearly visible
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.1);
+    // 1. Soft Warm Ambient Base Light
+    const ambientLight = new THREE.AmbientLight(0xfff5ea, 0.6);
     this.scene.add(ambientLight);
 
-    // Main Key Directional Light with Shadows
-    const keyLight = new THREE.DirectionalLight(0xfff5ea, 1.4);
-    keyLight.position.set(6, 14, 8);
+    // 2. Realistic Hemisphere Bounce Light (Warm sky bounce, rich mahogany ground bounce)
+    const hemiLight = new THREE.HemisphereLight(0xfff0dd, 0x221105, 0.65);
+    hemiLight.position.set(0, 20, 0);
+    this.scene.add(hemiLight);
+
+    // 3. Main Royal Key Chandelier Directional Light with Soft Shadows
+    const keyLight = new THREE.DirectionalLight(0xfffaed, 1.5);
+    keyLight.position.set(5, 15, 7);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.width = 2048;
     keyLight.shadow.mapSize.height = 2048;
@@ -66,10 +71,25 @@ export class SceneManager {
     keyLight.shadow.bias = -0.0005;
     this.scene.add(keyLight);
 
-    // Secondary Warm Fill Light from opposite side for black pieces
-    const fillLight = new THREE.DirectionalLight(0xfde68a, 0.7);
-    fillLight.position.set(-8, 10, -8);
-    this.scene.add(fillLight);
+    // 4. FOUR ROYAL AMBIENT CORNER LIGHTS (Matching User's Green Corner Circles!)
+    // Warm golden amber point lights positioned around the 4 corners of the board
+    const cornerPositions = [
+      [-4.6, 1.5, -4.6],
+      [4.6, 1.5, -4.6],
+      [-4.6, 1.5, 4.6],
+      [4.6, 1.5, 4.6]
+    ];
+
+    cornerPositions.forEach(pos => {
+      const cornerLight = new THREE.PointLight(0xffb84d, 3.2, 12.0, 2.0);
+      cornerLight.position.set(pos[0], pos[1], pos[2]);
+      this.scene.add(cornerLight);
+    });
+
+    // 5. Secondary Soft Warm Rim Light from back
+    const rimLight = new THREE.DirectionalLight(0xfde68a, 0.6);
+    rimLight.position.set(-7, 8, -7);
+    this.scene.add(rimLight);
   }
 
   resetCameraView(perspective = 'w') {
