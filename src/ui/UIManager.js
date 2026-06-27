@@ -63,6 +63,8 @@ export class UIManager {
     this.mainMenu.classList.remove('active');
     this.gameHud.classList.remove('hidden');
     this.botDifficultySelector.classList.add('hidden');
+    this.gameOverModal.classList.add('hidden');
+    this.promotionModal.classList.add('hidden');
 
     if (mode === 'bot') {
       this.nameWhite.textContent = 'White (You)';

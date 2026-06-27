@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { SceneManager } from './gfx/SceneManager.js';
 import { ChessBoard3D } from './gfx/ChessBoard3D.js';
+import { ProceduralTextureGenerator } from './gfx/ProceduralTextureGenerator.js';
 import { ChessEngine } from './logic/ChessEngine.js';
 import { BotAI } from './logic/BotAI.js';
 import { SoundManager } from './audio/SoundManager.js';
@@ -25,6 +26,9 @@ class GameApp {
   }
 
   async init() {
+    // Generate procedural textures
+    this._initTextures();
+
     // Sync initial board
     this.board3D.syncBoardState(this.engine.getBoard());
 
@@ -37,6 +41,31 @@ class GameApp {
 
     // Init Ads
     await this.ads.initialize();
+  }
+
+  /**
+   * Initialize all procedural textures for the scene
+   */
+  _initTextures() {
+    // Get the adaptive resolution from board3D
+    const resolution = this.board3D.textureResolution;
+    const texGen = new ProceduralTextureGenerator(resolution);
+
+    // Store reference to renderer for texture regeneration
+    this.board3D.renderer = this.sceneMgr.renderer;
+
+    // Generate all textures at once
+    const textures = texGen.generateAllTextures(this.sceneMgr.renderer);
+
+    // Apply textures to the board (tiles, frame, brass inlay)
+    this.board3D.textures = textures;
+    this.board3D._applyTexturesToBoard();
+
+    // Apply textures to piece materials
+    this.board3D.pieceGenerator.setTextures(textures);
+
+    // Set environment map for reflections on the scene
+    this.sceneMgr.scene.environment = textures.envMap;
   }
 
   setupUIEvents() {
@@ -241,6 +270,7 @@ class GameApp {
 
   startNewGame(mode) {
     this.gameMode = mode;
+    this.isAnimating = false;
     this.engine.reset();
     this.board3D.setSelectedSquare(null);
     this.board3D.clearHighlights();

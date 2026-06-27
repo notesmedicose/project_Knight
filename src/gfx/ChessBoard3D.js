@@ -1,10 +1,12 @@
 import * as THREE from 'three';
 import { PieceGenerator } from './PieceGenerator.js';
+import { ProceduralTextureGenerator } from './ProceduralTextureGenerator.js';
 
 export class ChessBoard3D {
   constructor(scene) {
     this.scene = scene;
     this.pieceGenerator = new PieceGenerator();
+    this.textures = null;
     
     // Board parameters
     this.tileSize = 1.0;
@@ -19,7 +21,79 @@ export class ChessBoard3D {
     this.selectedSquare = null;
     this.selectedMarker = null;
 
+    // Adaptive texture resolution
+    this.textureResolution = navigator.onLine ? 1024 : 512;
+    window.addEventListener('online', () => this._onConnectivityChange(true));
+    window.addEventListener('offline', () => this._onConnectivityChange(false));
+
     this.createBoardMesh();
+  }
+
+  /**
+   * Handle connectivity changes for adaptive texture resolution
+   */
+  _onConnectivityChange(isOnline) {
+    const newRes = isOnline ? 1024 : 512;
+    if (newRes !== this.textureResolution) {
+      this.textureResolution = newRes;
+      this._regenerateTextures();
+    }
+  }
+
+  /**
+   * Regenerate textures at the current resolution and reapply them
+   */
+  _regenerateTextures() {
+    if (!this.renderer) return;
+    const texGen = new ProceduralTextureGenerator(this.textureResolution);
+    this.textures = texGen.generateAllTextures(this.renderer);
+    this._applyTexturesToBoard();
+    this.pieceGenerator.setTextures(this.textures);
+    this.scene.environment = this.textures.envMap;
+  }
+
+  /**
+   * Apply procedural textures to board elements
+   */
+  _applyTexturesToBoard() {
+    const t = this.textures;
+    if (!t) return;
+
+    // Light tiles — golden oak wood grain
+    if (t.lightTile) {
+      this.lightTileMat.map = t.lightTile.map;
+      this.lightTileMat.bumpMap = t.lightTile.bumpMap;
+      this.lightTileMat.bumpScale = 0.04;
+      this.lightTileMat.roughnessMap = t.tileRoughness || null;
+      this.lightTileMat.needsUpdate = true;
+    }
+
+    // Dark tiles — walnut wood grain
+    if (t.darkTile) {
+      this.darkTileMat.map = t.darkTile.map;
+      this.darkTileMat.bumpMap = t.darkTile.bumpMap;
+      this.darkTileMat.bumpScale = 0.04;
+      this.darkTileMat.roughnessMap = t.tileRoughness || null;
+      this.darkTileMat.needsUpdate = true;
+    }
+
+    // Frame — mahogany
+    if (t.mahogany) {
+      this.frameMat.map = t.mahogany.map;
+      this.frameMat.bumpMap = t.mahogany.bumpMap;
+      this.frameMat.bumpScale = 0.08;
+      this.frameMat.needsUpdate = true;
+    }
+
+    // Brass inlay — gold brushed metal
+    if (t.gold) {
+      this.brassMat.map = t.gold.map;
+      this.brassMat.roughnessMap = t.gold.roughnessMap;
+      this.brassMat.metalnessMap = t.gold.metalnessMap;
+      this.brassMat.bumpMap = t.gold.bumpMap;
+      this.brassMat.bumpScale = 0.02;
+      this.brassMat.needsUpdate = true;
+    }
   }
 
   /**
@@ -79,36 +153,36 @@ export class ChessBoard3D {
 
     // 2. Luxury Inlaid Wood Board Frame with Golden Brass Border
     const frameGeom = new THREE.BoxGeometry(9.4, 0.4, 9.4);
-    const frameMat = new THREE.MeshStandardMaterial({
+    this.frameMat = new THREE.MeshStandardMaterial({
       color: 0x2b170c, // Deep rich walnut wood
       roughness: 0.25,
       metalness: 0.05,
       clearcoat: 0.5
     });
-    const frameMesh = new THREE.Mesh(frameGeom, frameMat);
+    const frameMesh = new THREE.Mesh(frameGeom, this.frameMat);
     frameMesh.position.y = -0.2;
     frameMesh.receiveShadow = true;
     this.boardGroup.add(frameMesh);
 
     // Golden Brass Inlay Border Ring
     const brassInlayGeom = new THREE.BoxGeometry(8.15, 0.42, 8.15);
-    const brassMat = new THREE.MeshStandardMaterial({
+    this.brassMat = new THREE.MeshStandardMaterial({
       color: 0xd4af37, // Royal Brass / Gold
       metalness: 0.9,
       roughness: 0.2
     });
-    const brassMesh = new THREE.Mesh(brassInlayGeom, brassMat);
+    const brassMesh = new THREE.Mesh(brassInlayGeom, this.brassMat);
     brassMesh.position.y = -0.19;
     this.boardGroup.add(brassMesh);
 
     // Light and Dark Wood Inlaid Tile Materials (Matching Reference Photo!)
-    const lightTileMat = new THREE.MeshStandardMaterial({
+    this.lightTileMat = new THREE.MeshStandardMaterial({
       color: 0xdfb76c, // Golden Maple Wood
       roughness: 0.25,
       metalness: 0.05,
       clearcoat: 0.3
     });
-    const darkTileMat = new THREE.MeshStandardMaterial({
+    this.darkTileMat = new THREE.MeshStandardMaterial({
       color: 0x3d1d11, // Rich Mahogany Wood
       roughness: 0.3,
       metalness: 0.05,
@@ -120,7 +194,7 @@ export class ChessBoard3D {
     for (let rank = 0; rank < 8; rank++) {
       for (let file = 0; file < 8; file++) {
         const isLight = (rank + file) % 2 === 1;
-        const tileMesh = new THREE.Mesh(tileGeom, isLight ? lightTileMat : darkTileMat);
+        const tileMesh = new THREE.Mesh(tileGeom, isLight ? this.lightTileMat : this.darkTileMat);
         
         const fileChar = String.fromCharCode(97 + file);
         const square = `${fileChar}${rank + 1}`;
