@@ -7,14 +7,14 @@ import { BotAI } from './logic/BotAI.js';
 import { SoundManager } from './audio/SoundManager.js';
 import { UIManager } from './ui/UIManager.js';
 import { AdManager } from './ads/AdManager.js';
+import { TalkingTom } from './logic/TalkingTom.js';
+import { TomUI } from './ui/TomUI.js';
 
 class GameApp {
   constructor() {
-    this.gameMode = 'bot'; // 'bot' or 'friend'
-    this.playerColor = 'w'; // 'w' or 'b'
+    this.gameMode = 'bot';
+    this.playerColor = 'w';
     this.isAnimating = false;
-
-    // Subsystems
     this.sceneMgr = new SceneManager('canvas-container');
     this.board3D = new ChessBoard3D(this.sceneMgr.scene);
     this.engine = new ChessEngine();
@@ -22,71 +22,45 @@ class GameApp {
     this.sound = new SoundManager();
     this.ui = new UIManager();
     this.ads = new AdManager();
-
+    this.tom = new TalkingTom('bot');
+    this.tomUI = new TomUI();
     this.init();
   }
 
   async init() {
-    // Generate procedural textures
     this._initTextures();
-
-    // Sync initial board
     this.board3D.syncBoardState(this.engine.getBoard());
-
-    // Setup Event Handlers
     this.setupUIEvents();
     this.setupInputEvents();
-
-    // Start render loop
+    this.setupTomEvents();
     this.animate();
-
-    // Init Ads
     await this.ads.initialize();
   }
 
-  /**
-   * Initialize all procedural textures for the scene
-   */
   _initTextures() {
-    // Get the adaptive resolution from board3D
     const resolution = this.board3D.textureResolution;
     const texGen = new ProceduralTextureGenerator(resolution);
-
-    // Store reference to renderer for texture regeneration
     this.board3D.renderer = this.sceneMgr.renderer;
-
-    // Generate all textures at once
     const textures = texGen.generateAllTextures(this.sceneMgr.renderer);
-
-    // Apply textures to the board (tiles, frame, brass inlay)
     this.board3D.textures = textures;
     this.board3D._applyTexturesToBoard();
-
-    // Apply textures to piece materials
     this.board3D.pieceGenerator.setTextures(textures);
-
-    // Set environment map for reflections on the scene
     this.sceneMgr.scene.environment = textures.envMap;
   }
 
   setupUIEvents() {
-    // Menu Mode buttons
     this.ui.btnModeBot.addEventListener('click', () => {
       this.ui.botDifficultySelector.classList.remove('hidden');
     });
-
     this.ui.btnModeFriend.addEventListener('click', () => {
       this.playerColor = 'w';
       this.startNewGame('friend');
     });
-
     this.ui.btnStartBotGame.addEventListener('click', () => {
       this.bot.setDifficulty(this.ui.selectedDifficulty);
       this.playerColor = this.ui.selectedSide || 'w';
       this.startNewGame('bot');
     });
-
-    // HUD Actions
     this.ui.btnHudMenu.addEventListener('click', (e) => {
       e.stopPropagation();
       this.sound.playMove();
@@ -94,25 +68,18 @@ class GameApp {
       this.board3D.clearHighlights();
       this.ui.showMainMenu();
     });
-
     this.ui.btnHudReset.addEventListener('click', (e) => {
       e.stopPropagation();
       this.sound.playMove();
       this.startNewGame(this.gameMode);
     });
-
     this.ui.btnHudUndo.addEventListener('click', (e) => {
       e.stopPropagation();
       if (this.isAnimating) return;
-
-      // Hide game over modal if open
       this.ui.gameOverModal.classList.add('hidden');
-
       const history = this.engine.history();
       if (history.length === 0) return;
-
       if (this.gameMode === 'bot') {
-        // Undo bot move and player move to return to player's turn
         if (this.engine.turn() === this.playerColor && history.length >= 2) {
           this.engine.undo();
           this.engine.undo();
@@ -122,7 +89,6 @@ class GameApp {
       } else {
         this.engine.undo();
       }
-
       this.sound.playMove();
       this.board3D.setSelectedSquare(null);
       this.board3D.clearHighlights();
@@ -131,147 +97,122 @@ class GameApp {
       this.ui.updateTurn(this.engine.turn(), this.engine.inCheck());
       this.ui.updateCapturedPieces(this.engine.history());
     });
-
     this.ui.btnHudCamera.addEventListener('click', (e) => {
       e.stopPropagation();
-      this.sound.playMove();
-      this.sceneMgr.toggleCameraView();
+      const p = (this.gameMode === 'friend' && this.engine.turn() === 'b') ? 'b' : this.playerColor;
+      this.sceneMgr.resetCameraView(p);
     });
-
     this.ui.btnHudSound.addEventListener('click', (e) => {
       e.stopPropagation();
-      const enabled = this.sound.toggleSound();
-      this.ui.btnHudSound.textContent = enabled ? '🔊' : '🔇';
-      this.ui.btnHudSound.style.opacity = enabled ? '1.0' : '0.5';
+      this.ui.btnHudSound.textContent = this.sound.toggleSound() ? '🔊' : '🔇';
     });
-
-    // Modal Actions
-    this.ui.btnRestartGame.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.sound.playMove();
+    this.ui.btnRestartGame.addEventListener('click', () => {
       this.startNewGame(this.gameMode);
     });
-
-    this.ui.btnReturnMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.sound.playMove();
+    this.ui.btnReturnMenu.addEventListener('click', () => {
       this.ui.showMainMenu();
     });
   }
 
   setupInputEvents() {
     const dom = this.sceneMgr.renderer.domElement;
-    
-    const handlePointerDown = (event) => {
+    const handler = (event) => {
       if (this.isAnimating || this.engine.isGameOver()) return;
-
-      // Disable input during bot turn
-      const botColor = this.playerColor === 'w' ? 'b' : 'w';
-      if (this.gameMode === 'bot' && this.engine.turn() === botColor) return;
-
+      if (this.gameMode === 'bot') {
+        const bc = this.playerColor === 'w' ? 'b' : 'w';
+        if (this.engine.turn() === bc) return;
+      }
       const rect = dom.getBoundingClientRect();
       const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
       this.sceneMgr.mouse.set(x, y);
       this.sceneMgr.raycaster.setFromCamera(this.sceneMgr.mouse, this.sceneMgr.camera);
-
-      // Check intersections with tiles or pieces
-      const intersects = this.sceneMgr.raycaster.intersectObjects(this.sceneMgr.scene.children, true);
-
-      let clickedSquare = null;
-      for (const hit of intersects) {
-        let obj = hit.object;
-        while (obj && !obj.userData.square && !obj.userData.isTile) {
-          obj = obj.parent;
-        }
-        if (obj && obj.userData.square) {
-          clickedSquare = obj.userData.square;
-          break;
-        }
-      }
-
-      if (clickedSquare) {
-        this.onSquareClicked(clickedSquare);
+      const tiles = this.board3D.getAllTileMeshes();
+      const hits = this.sceneMgr.raycaster.intersectObjects(tiles);
+      if (hits.length > 0) {
+        this.handleSquareClick(hits[0].object.userData.square);
       }
     };
-
-    dom.addEventListener('pointerdown', handlePointerDown);
+    dom.addEventListener('pointerdown', handler);
+    dom.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      handler(e.touches[0]);
+    }, { passive: false });
   }
 
-  onSquareClicked(square) {
-    const pieceOnSquare = this.engine.game.get(square);
-    const currentTurn = this.engine.turn();
-
-    // Case 1: Clicking player's own piece -> Select it
-    if (pieceOnSquare && pieceOnSquare.color === currentTurn) {
-      this.board3D.setSelectedSquare(square);
-      const validMoves = this.engine.getValidMoves(square);
-      this.board3D.showMoveHighlights(validMoves);
+  handleSquareClick(sq) {
+    const from = this.board3D.selectedSquare;
+    if (!from) {
+      const p = this.engine.game.get(sq);
+      if (p && p.color === this.engine.turn()) {
+        this.board3D.setSelectedSquare(sq);
+        this.board3D.showMoveHighlights(this.engine.getValidMoves(sq));
+      }
       return;
     }
-
-    // Case 2: Clicking a destination square with a selected piece
-    if (this.board3D.selectedSquare) {
-      const fromSq = this.board3D.selectedSquare;
-      const validMoves = this.engine.getValidMoves(fromSq);
-
-      if (validMoves.includes(square)) {
-        // Check for Pawn promotion
-        const movingPiece = this.engine.game.get(fromSq);
-        const isPawnPromotion = movingPiece.type === 'p' && (square[1] === '8' || square[1] === '1');
-
-        if (isPawnPromotion) {
-          this.ui.showPromotionModal((promoType) => {
-            this.executeMove(fromSq, square, promoType);
-          });
-        } else {
-          this.executeMove(fromSq, square, 'q');
-        }
+    if (sq === from) {
+      this.board3D.setSelectedSquare(null);
+      this.board3D.clearHighlights();
+      return;
+    }
+    const moves = this.engine.getValidMoves(from);
+    if (moves.includes(sq)) {
+      const piece = this.engine.game.get(from);
+      const promo = piece.type === 'p' && (sq[1] === '8' || sq[1] === '1');
+      if (promo) {
+        this.ui.showPromotionModal((t) => this.executeMove(from, sq, t));
       } else {
-        // Deselect if clicking invalid square
-        this.board3D.setSelectedSquare(null);
-        this.board3D.clearHighlights();
+        this.executeMove(from, sq, 'q');
       }
+    } else {
+      this.board3D.setSelectedSquare(null);
+      this.board3D.clearHighlights();
     }
   }
 
-  executeMove(fromSq, toSq, promotion = 'q') {
+  executeMove(from, to, promo = 'q') {
     this.isAnimating = true;
     this.board3D.setSelectedSquare(null);
     this.board3D.clearHighlights();
-
-    const isCapture = !!this.engine.game.get(toSq);
-    const moveResult = this.engine.makeMove(fromSq, toSq, promotion);
-
-    if (moveResult) {
-      this.board3D.animateMove(fromSq, toSq, () => {
+    const isCap = !!this.engine.game.get(to);
+    const result = this.engine.makeMove(from, to, promo);
+    if (result) {
+      const userMove = this.gameMode === 'bot' && result.color === this.playerColor;
+      this.board3D.animateMove(from, to, () => {
         this.isAnimating = false;
-        
-        // Sound effect
-        if (isCapture) {
-          this.sound.playCapture();
-        } else {
-          this.sound.playMove();
-        }
-
-        // Sync state for special moves (castling, en passant, promotion)
+        if (isCap) this.sound.playCapture();
+        else this.sound.playMove();
         this.board3D.syncBoardState(this.engine.getBoard());
         this.board3D.updateTurnLights(this.engine.turn());
         this.ui.updateTurn(this.engine.turn(), this.engine.inCheck());
         this.ui.updateCapturedPieces(this.engine.history());
-
-        // Check for check audio/status
-        if (this.engine.inCheck()) {
-          this.sound.playCheck();
+        const chk = this.engine.inCheck();
+        if (chk) this.sound.playCheck();
+        if (userMove) {
+          const ev = this.tom.evaluateMove(this.engine.game, from, to, promo);
+          this.tomUI.bounce();
+          if (this.engine.isCheckmate()) { this.checkGameOver(); return; }
+          else if (this.engine.isDraw()) { this.checkGameOver(); return; }
+          else if (chk && isCap) {
+            this.tomUI.showMessage(this.tom.getMotivationalMessage('capture'), 3000);
+            setTimeout(() => this.tomUI.showMessage(this.tom.getMotivationalMessage('check'), 3000), 3200);
+          } else if (chk) {
+            this.tomUI.showMessage(this.tom.getMotivationalMessage('check'), 3000);
+          } else if (isCap) {
+            this.tomUI.showMessage(this.tom.getMotivationalMessage('capture'), 3000);
+          } else {
+            this.tomUI.showMessage(this.tom.getMotivationalMessage('move', ev.quality), 3000);
+          }
+          if (this.gameMode === 'bot' && !this.engine.isGameOver()) {
+            this.tomUI.setHintButtonVisible(true);
+          }
         }
-
-        // Check Game Over
-        if (this.checkGameOver()) return;
-
-        // Trigger Bot turn if playing Bot and it's bot's turn
-        const botColor = this.playerColor === 'w' ? 'b' : 'w';
-        if (this.gameMode === 'bot' && this.engine.turn() === botColor) {
+        if (!userMove && (this.engine.isCheckmate() || this.engine.isDraw())) {
+          this.checkGameOver();
+          return;
+        }
+        const bc = this.playerColor === 'w' ? 'b' : 'w';
+        if (this.gameMode === 'bot' && this.engine.turn() === bc) {
           this.triggerBotMove();
         }
       });
@@ -282,26 +223,38 @@ class GameApp {
 
   async triggerBotMove() {
     this.isAnimating = true;
-    const botMove = await this.bot.calculateBestMove(this.engine.game);
+    this.tomUI.hideSpeech();
+    this.tomUI.setHintButtonVisible(false);
+    this.tomUI.showMessage("Tom's turn... calculating... 🧠", 1500);
+    const move = await this.bot.calculateBestMove(this.engine.game);
     this.isAnimating = false;
-
-    if (botMove) {
-      this.executeMove(botMove.from, botMove.to, botMove.promotion || 'q');
-    }
+    if (move) this.executeMove(move.from, move.to, move.promotion || 'q');
   }
 
   checkGameOver() {
-    if (this.engine.isGameOver()) {
-      this.sound.playGameOver();
-      if (this.engine.isCheckmate()) {
-        const winner = this.engine.turn() === 'w' ? 'Black' : 'White';
-        this.ui.showGameOver('CHECKMATE!', `${winner} Wins the Game!`);
-      } else if (this.engine.isDraw()) {
-        this.ui.showGameOver('DRAW!', 'The game ended in a draw.');
+    if (!this.engine.isGameOver()) return false;
+    this.sound.playGameOver();
+    this.tomUI.setHintButtonVisible(false);
+    this.tomUI.hideSpeech();
+    if (this.engine.isCheckmate()) {
+      const w = this.engine.turn() === 'w' ? 'Black' : 'White';
+      this.ui.showGameOver('CHECKMATE!', w + ' Wins the Game!');
+      if (this.gameMode === 'bot') {
+        const win = w.toLowerCase() !== this.playerColor;
+        setTimeout(() => {
+          if (win) {
+            this.tomUI.showMessage(this.tom.getMotivationalMessage('checkmate'), 6000);
+            this.tomUI.bounce();
+          } else {
+            this.tomUI.showMessage(this.tom.getMotivationalMessage('gameover_loss'), 5000);
+          }
+        }, 600);
       }
-      return true;
+    } else if (this.engine.isDraw()) {
+      this.ui.showGameOver('DRAW!', 'The game ended in a draw.');
+      setTimeout(() => this.tomUI.showMessage(this.tom.getMotivationalMessage('gameover_draw'), 5000), 600);
     }
-    return false;
+    return true;
   }
 
   startNewGame(mode) {
@@ -312,19 +265,48 @@ class GameApp {
     this.board3D.clearHighlights();
     this.board3D.syncBoardState(this.engine.getBoard());
     this.board3D.updateTurnLights('w');
-    
-    const camPerspective = (mode === 'bot') ? this.playerColor : 'w';
-    this.sceneMgr.resetCameraView(camPerspective);
+    const cam = mode === 'bot' ? this.playerColor : 'w';
+    this.sceneMgr.resetCameraView(cam);
     this.ui.showGameHUD(mode, this.playerColor);
     this.ui.updateTurn('w', false);
     this.ui.updateCapturedPieces([]);
-
-    // If starting a bot game where player chose Black, bot (White) moves first!
+    this.tom.setGameMode(mode);
+    this.tomUI.setGameModeVisual(mode);
+    this.tomUI.hideSpeech();
+    this.tomUI.setHintButtonVisible(false);
+    setTimeout(() => this.tomUI.showMessage(this.tom.getWelcomeMessage(), 4000), 500);
     if (mode === 'bot' && this.playerColor === 'b') {
-      setTimeout(() => {
-        this.triggerBotMove();
-      }, 400);
+      setTimeout(() => this.triggerBotMove(), 400);
     }
+  }
+
+  setupTomEvents() {
+    this.tomUI.onHintClick(async () => {
+      if (this.engine.isGameOver()) {
+        this.tomUI.showMessage("Game's over fam! No more moves to hint! 🎬");
+        return;
+      }
+      this.tomUI.setHintButtonVisible(false);
+      this.tomUI.showMessage("Tom's thinking... 🤔", 1500);
+      setTimeout(async () => {
+        const hint = await this.tom.getBestMoveHint(this.engine.game, this.bot);
+        this.tomUI.showHint(hint);
+        this.tomUI.bounce();
+        setTimeout(() => {
+          if (!this.engine.isGameOver()) this.tomUI.setHintButtonVisible(true);
+        }, 4000);
+      }, 600);
+    });
+    this.tomUI.onAvatarClick(() => {
+      if (this.gameMode === 'friend' && !this.engine.isGameOver()) {
+        this.tomUI.setHintButtonVisible(true);
+        this.tomUI.showMessage(this.tom.getFriendHintOffer(), 3000);
+      } else if (this.gameMode === 'bot' && !this.engine.isGameOver()) {
+        const vis = !this.tomUI.hintBtn.classList.contains('hidden');
+        this.tomUI.setHintButtonVisible(!vis);
+        if (!vis) this.tomUI.showMessage("Click the button for a spicy hint! 🌶️", 2500);
+      }
+    });
   }
 
   animate() {
@@ -333,7 +315,6 @@ class GameApp {
   }
 }
 
-// Instantiate App on DOM load
 window.addEventListener('DOMContentLoaded', () => {
   window.app = new GameApp();
 });
