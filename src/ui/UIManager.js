@@ -38,7 +38,9 @@ export class UIManager {
     this.btnReturnMenu = document.getElementById('btn-return-menu');
 
     this.selectedDifficulty = 'medium';
+    this.selectedSide = 'w';
     this.setupDifficultyButtons();
+    this.setupSideButtons();
   }
 
   setupDifficultyButtons() {
@@ -52,6 +54,17 @@ export class UIManager {
     });
   }
 
+  setupSideButtons() {
+    const sideBtns = document.querySelectorAll('.btn-side');
+    sideBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        sideBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.selectedSide = btn.getAttribute('data-side');
+      });
+    });
+  }
+
   showMainMenu() {
     this.mainMenu.classList.add('active');
     this.gameHud.classList.add('hidden');
@@ -59,7 +72,7 @@ export class UIManager {
     this.promotionModal.classList.add('hidden');
   }
 
-  showGameHUD(mode) {
+  showGameHUD(mode, playerSide = 'w') {
     this.mainMenu.classList.remove('active');
     this.gameHud.classList.remove('hidden');
     this.botDifficultySelector.classList.add('hidden');
@@ -67,8 +80,13 @@ export class UIManager {
     this.promotionModal.classList.add('hidden');
 
     if (mode === 'bot') {
-      this.nameWhite.textContent = 'White (You)';
-      this.nameBlack.textContent = `Black (Bot: ${this.selectedDifficulty.toUpperCase()})`;
+      if (playerSide === 'w') {
+        this.nameWhite.textContent = 'White (You)';
+        this.nameBlack.textContent = `Black (Bot: ${this.selectedDifficulty.toUpperCase()})`;
+      } else {
+        this.nameWhite.textContent = `White (Bot: ${this.selectedDifficulty.toUpperCase()})`;
+        this.nameBlack.textContent = 'Black (You)';
+      }
     } else {
       this.nameWhite.textContent = 'White (Player 1)';
       this.nameBlack.textContent = 'Black (Player 2)';

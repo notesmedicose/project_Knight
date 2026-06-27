@@ -32,7 +32,7 @@
           </button>
         </div>
 
-        <!-- Bot Difficulty Selection Modal embedded in menu -->
+        <!-- Bot Difficulty & Side Selection Modal embedded in menu -->
         <div id="bot-difficulty-selector" class="difficulty-box hidden">
           <h3>Select AI Difficulty</h3>
           <div class="difficulty-buttons">
@@ -40,7 +40,14 @@
             <button class="btn-diff active" data-diff="medium">Medium (Challenger)</button>
             <button class="btn-diff" data-diff="hard">Hard (Master)</button>
           </div>
-          <button id="btn-start-bot-game" class="btn btn-accent">Start Game</button>
+
+          <h3 style="margin-top: 6px;">Choose Your Side</h3>
+          <div class="side-buttons">
+            <button class="btn-side active" data-side="w">♔ White (Move 1st)</button>
+            <button class="btn-side" data-side="b">♚ Black (Move 2nd)</button>
+          </div>
+
+          <button id="btn-start-bot-game" class="btn btn-accent" style="margin-top: 6px;">Start Game</button>
         </div>
 
         <div class="menu-footer">

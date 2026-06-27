@@ -11,6 +11,7 @@ import { AdManager } from './ads/AdManager.js';
 class GameApp {
   constructor() {
     this.gameMode = 'bot'; // 'bot' or 'friend'
+    this.playerColor = 'w'; // 'w' or 'b'
     this.isAnimating = false;
 
     // Subsystems
@@ -75,11 +76,13 @@ class GameApp {
     });
 
     this.ui.btnModeFriend.addEventListener('click', () => {
+      this.playerColor = 'w';
       this.startNewGame('friend');
     });
 
     this.ui.btnStartBotGame.addEventListener('click', () => {
       this.bot.setDifficulty(this.ui.selectedDifficulty);
+      this.playerColor = this.ui.selectedSide || 'w';
       this.startNewGame('bot');
     });
 
@@ -109,8 +112,8 @@ class GameApp {
       if (history.length === 0) return;
 
       if (this.gameMode === 'bot') {
-        // In bot mode, if it's white's turn, undo bot move and player move
-        if (this.engine.turn() === 'w' && history.length >= 2) {
+        // Undo bot move and player move to return to player's turn
+        if (this.engine.turn() === this.playerColor && history.length >= 2) {
           this.engine.undo();
           this.engine.undo();
         } else {
@@ -163,7 +166,8 @@ class GameApp {
       if (this.isAnimating || this.engine.isGameOver()) return;
 
       // Disable input during bot turn
-      if (this.gameMode === 'bot' && this.engine.turn() === 'b') return;
+      const botColor = this.playerColor === 'w' ? 'b' : 'w';
+      if (this.gameMode === 'bot' && this.engine.turn() === botColor) return;
 
       const rect = dom.getBoundingClientRect();
       const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -265,8 +269,9 @@ class GameApp {
         // Check Game Over
         if (this.checkGameOver()) return;
 
-        // Trigger Bot turn if playing Bot
-        if (this.gameMode === 'bot' && this.engine.turn() === 'b') {
+        // Trigger Bot turn if playing Bot and it's bot's turn
+        const botColor = this.playerColor === 'w' ? 'b' : 'w';
+        if (this.gameMode === 'bot' && this.engine.turn() === botColor) {
           this.triggerBotMove();
         }
       });
@@ -307,10 +312,19 @@ class GameApp {
     this.board3D.clearHighlights();
     this.board3D.syncBoardState(this.engine.getBoard());
     this.board3D.updateTurnLights('w');
-    this.sceneMgr.resetCameraView('w');
-    this.ui.showGameHUD(mode);
+    
+    const camPerspective = (mode === 'bot') ? this.playerColor : 'w';
+    this.sceneMgr.resetCameraView(camPerspective);
+    this.ui.showGameHUD(mode, this.playerColor);
     this.ui.updateTurn('w', false);
     this.ui.updateCapturedPieces([]);
+
+    // If starting a bot game where player chose Black, bot (White) moves first!
+    if (mode === 'bot' && this.playerColor === 'b') {
+      setTimeout(() => {
+        this.triggerBotMove();
+      }, 400);
+    }
   }
 
   animate() {
