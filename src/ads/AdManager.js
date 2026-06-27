@@ -7,7 +7,7 @@ export class AdManager {
   constructor() {
     this.initialized = false;
     this.testBannerId = 'ca-app-pub-3940256099942544/6300978111';
-    this.prodBannerId = 'ca-app-pub-3940256099942544/6300978111';
+    this.prodBannerId = 'ca-app-pub-6924423095909700/1256205488';
     this._isProduction = false;
   }
 

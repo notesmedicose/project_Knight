@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "000000000000",
+    "project_number": "820460122853",
     "project_id": "knight-3d-chess",
-    "storage_bucket": "knight-3d-chess.appspot.com"
+    "storage_bucket": "knight-3d-chess.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+        "mobilesdk_app_id": "1:820460122853:android:4427923bf7e575e8b55a0c",
         "android_client_info": {
           "package_name": "com.knightchess.game"
         }
@@ -15,18 +15,25 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "YOUR_GOOGLE_API_KEY_HERE"
+          "current_key": "AIzaSyBGayPhL33OJ2SA9-wbiyvjWxP9Rye89iU"
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "ads_service": {
-          "status": 2
+        "appinvite_service": {
+          "other_platform_oauth_client": []
         }
       }
     }
   ],
   "configuration_version": "1"
+}
+
+{
+  "appId": "com.knightchess.game",
+  "appName": "Knight 3D Chess",
+  "plugins": {
+    "AdMob": {
+      "appId": "ca-app-pub-6924423095909700~4384363489"
+    }
+  }
 }

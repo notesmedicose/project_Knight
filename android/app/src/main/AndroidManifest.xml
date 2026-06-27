@@ -44,7 +44,7 @@
         <!-- Google AdMob Application ID metadata -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-6924423095909700~4384363489"/>
     </application>
 
     <!-- Permissions — only INTERNET required for AdMob, no tracking -->

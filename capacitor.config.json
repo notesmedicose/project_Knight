@@ -1,4 +1,4 @@
-{
+﻿{
   "appId": "com.knightchess.game",
   "appName": "Knight 3D Chess",
   "webDir": "dist",
@@ -8,7 +8,7 @@
   },
   "plugins": {
     "AdMob": {
-      "appId": "ca-app-pub-3940256099942544~3347511713"
+      "appId": "ca-app-pub-6924423095909700~4384363489"
     }
   }
 }

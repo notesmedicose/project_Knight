@@ -1,0 +1,10 @@
+﻿  async init() {
+    this._initTextures();
+    this.board3D.syncBoardState(this.engine.getBoard());
+    this.setupUIEvents();
+    this.setupInputEvents();
+    this.setupTomEvents();
+    this.animate();
+    this.ads.enableProduction();
+    await this.ads.initialize();
+  }
