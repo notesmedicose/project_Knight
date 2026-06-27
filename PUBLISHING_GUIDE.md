@@ -74,6 +74,7 @@ Install on 3+ real Android devices and test:
 - Declare Ads: **Yes, this app contains ads**
 - Add Privacy Policy URL: *(use your own hosted URL or a privacy policy service)*
 
+
 ---
 
 ## 📝 Store Description (Copy/Paste)
