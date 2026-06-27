@@ -411,6 +411,18 @@ body, html {
   text-align: center;
 }
 
+/* Privacy panel scrolling */
+.privacy-panel { max-height: 80vh; display: flex; flex-direction: column; }
+.privacy-scroll {
+  overflow-y: auto;
+  max-height: 50vh;
+  text-align: left;
+  font-size: 13px;
+  padding-right: 4px;
+}
+.privacy-scroll p { margin-bottom: 10px; color: var(--text-secondary); line-height: 1.6; }
+.privacy-scroll a { color: var(--accent-cyan); word-break: break-all; }
+
 .modal-panel h2 {
   font-family: var(--font-heading);
   margin-bottom: 8px;
@@ -682,23 +694,47 @@ body, html {
 
 /* Responsive: smaller on mobile */
 @media (max-width: 600px) {
-  .tom-container {
-    bottom: 12px;
-  }
-  .tom-avatar {
-    width: 46px;
-    height: 46px;
-    font-size: 22px;
-  }
-  .tom-speech {
-    max-width: 260px;
-    padding: 10px 14px;
-  }
-  #tom-text {
-    font-size: 13px;
-  }
-  .tom-hint-btn {
-    font-size: 12px;
-    padding: 8px 16px;
-  }
+  .tom-container { bottom: 12px; }
+  .tom-avatar { width: 46px; height: 46px; font-size: 22px; }
+  .tom-speech { max-width: 260px; padding: 10px 14px; }
+  #tom-text { font-size: 13px; }
+  .tom-hint-btn { font-size: 12px; padding: 8px 16px; }
+}
+
+/* Exit toast for back button */
+.exit-toast {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  padding: 10px 24px;
+  background: rgba(15, 23, 42, 0.9);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 20px;
+  animation: fadeInUp 0.3s ease;
+  pointer-events: none;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Ghost button (privacy policy) */
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font-main);
+  transition: color 0.2s;
+  font-weight: 500;
+}
+.btn-ghost:hover { color: var(--accent-cyan); }
+
+@media (max-width: 600px) {
+  .exit-toast { bottom: 70px; font-size: 12px; padding: 8px 18px; }
 }

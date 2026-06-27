@@ -6,6 +6,11 @@
   <title>Knight 3D Chess - Pro Game Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#090c10">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/style.css" />
 </head>
@@ -54,6 +59,10 @@
           <span class="tag">100% Offline Game</span>
           <span class="tag">No Account Needed</span>
         </div>
+
+        <button id="btn-privacy-policy" class="btn btn-ghost" style="margin-top: 4px; font-size: 11px;">
+          📜 Privacy Policy
+        </button>
       </div>
     </div>
 
@@ -112,6 +121,23 @@
           <button id="btn-restart-game" class="btn btn-primary">Play Again</button>
           <button id="btn-return-menu" class="btn btn-secondary">Main Menu</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacy-modal" class="modal-overlay hidden">
+      <div class="glass-panel modal-panel privacy-panel">
+        <h2>📜 Privacy Policy</h2>
+        <div class="privacy-scroll">
+          <p><strong>Last updated: June 2025</strong></p>
+          <p>Knight 3D Chess is a <strong>100% offline game</strong>. We do <strong>NOT</strong> collect, store, or transmit any personal data.</p>
+          <p><strong>No Account Required.</strong> No sign-up, login, or tracking.</p>
+          <p><strong>AdMob Advertising:</strong> This app uses Google AdMob for banner ads. AdMob may collect anonymous device identifiers (Advertising ID) and general non-precise location data. You can reset your Advertising ID in your device settings.</p>
+          <p><strong>Children:</strong> We do not knowingly collect data from children under 13.</p>
+          <p><strong>No Analytics / Crash Reporting:</strong> No third-party analytics SDKs are used.</p>
+          <p>For full details, view our complete privacy policy at <a href="privacy.html" target="_blank" style="color: #06b6d4;">privacy.html</a> or see <a href="https://policies.google.com/privacy" target="_blank" style="color: #06b6d4;">Google's Privacy Policy</a>.</p>
+        </div>
+        <button id="btn-privacy-close" class="btn btn-primary" style="margin-top: 12px;">I Understand</button>
       </div>
     </div>
 

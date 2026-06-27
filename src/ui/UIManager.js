@@ -37,6 +37,10 @@ export class UIManager {
     this.btnRestartGame = document.getElementById('btn-restart-game');
     this.btnReturnMenu = document.getElementById('btn-return-menu');
 
+    this.btnPrivacyPolicy = document.getElementById('btn-privacy-policy');
+    this.privacyModal = document.getElementById('privacy-modal');
+    this.btnPrivacyClose = document.getElementById('btn-privacy-close');
+
     this.selectedDifficulty = 'medium';
     this.selectedSide = 'w';
     this.setupDifficultyButtons();

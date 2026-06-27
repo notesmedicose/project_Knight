@@ -1,4 +1,29 @@
-node_modules
+﻿node_modules
 dist
 .DS_Store
 *.log
+
+# Android build outputs
+android/app/build/
+android/app/release/
+*.apk
+*.aab
+
+# Keystore (KEEP PRIVATE!)
+*.keystore
+keystore.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Capacitor
+android/.gradle/
+android/captures/
+local.properties
+
+# OS
+Thumbs.db
+*.swp
+*.swo

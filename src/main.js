@@ -315,6 +315,89 @@ class GameApp {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// Error Boundary
+// ═══════════════════════════════════════════════════════════════════
+window.addEventListener('error', (event) => {
+  console.error('Error:', event.error || event.message);
+  const el = document.getElementById('app');
+  if (el && !document.getElementById('error-overlay')) {
+    const ov = document.createElement('div');
+    ov.id = 'error-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#090c10;color:#f8fafc;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;font-family:sans-serif;text-align:center';
+    ov.innerHTML = '<div style="font-size:48px;margin-bottom:16px">⚠️</div><h2 style="color:#f59e0b;margin-bottom:8px">Something went wrong</h2><p style="color:#94a3b8;margin-bottom:20px;max-width:400px">The app will reload automatically.</p><button onclick="location.reload()" style="background:#06b6d4;color:white;border:none;padding:12px 32px;border-radius:12px;font-size:16px;cursor:pointer">Reload App</button><p style="color:#64748b;font-size:11px;margin-top:16px">' + (event.message || 'Unknown error') + '</p>';
+    el.appendChild(ov);
+  }
+  event.preventDefault();
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Service Worker
+// ═══════════════════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Game State Persistence
+// ═══════════════════════════════════════════════════════════════════
+window.GameSave = {
+  save(state) {
+    try { localStorage.setItem('knight3d_save', JSON.stringify({ ...state, ts: Date.now() })); } catch(e) {}
+  },
+  load() {
+    try {
+      const d = JSON.parse(localStorage.getItem('knight3d_save'));
+      return d && Date.now() - d.ts < 3600000 ? d : null;
+    } catch(e) { return null; }
+  },
+  clear() { localStorage.removeItem('knight3d_save'); }
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Android Back Button
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener('backbutton', (e) => {
+  e.preventDefault();
+  const a = window.app;
+  if (!a) return;
+  if (!a.ui.gameOverModal.classList.contains('hidden')) { a.ui.gameOverModal.classList.add('hidden'); return; }
+  if (!a.ui.promotionModal.classList.contains('hidden')) { a.ui.promotionModal.classList.add('hidden'); return; }
+  if (!a.ui.privacyModal.classList.contains('hidden')) { a.ui.privacyModal.classList.add('hidden'); return; }
+  if (!a.ui.mainMenu.classList.contains('active')) { a.ui.showMainMenu(); return; }
+  if (window._exitTimer) {
+    clearTimeout(window._exitTimer);
+    window._exitTimer = null;
+    if (navigator.app && navigator.app.exitApp) navigator.app.exitApp();
+  } else {
+    window._exitTimer = setTimeout(() => { window._exitTimer = null; }, 2000);
+    const t = document.createElement('div');
+    t.className = 'exit-toast glass-pill';
+    t.textContent = 'Press back again to exit';
+    document.getElementById('app').appendChild(t);
+    setTimeout(() => { if (t.parentNode) t.parentNode.removeChild(t); }, 2000);
+  }
+}, false);
+
+// ═══════════════════════════════════════════════════════════════════
+// Privacy Policy Modal
+// ═══════════════════════════════════════════════════════════════════
+setTimeout(() => {
+  const bp = document.getElementById('btn-privacy-policy');
+  const pm = document.getElementById('privacy-modal');
+  const bc = document.getElementById('btn-privacy-close');
+  if (bp && pm && bc) {
+    bp.addEventListener('click', () => pm.classList.remove('hidden'));
+    bc.addEventListener('click', () => pm.classList.add('hidden'));
+    pm.addEventListener('click', (e) => { if (e.target === pm) pm.classList.add('hidden'); });
+  }
+}, 100);
+
+// ═══════════════════════════════════════════════════════════════════
+// Instantiate App
+// ═══════════════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
   window.app = new GameApp();
 });

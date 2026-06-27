@@ -1,0 +1,37 @@
+{
+  "name": "Knight 3D Chess",
+  "short_name": "Knight Chess",
+  "description": "Procedural 3D Chess Game — Play vs AI or Friends offline",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090c10",
+  "theme_color": "#090c10",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
