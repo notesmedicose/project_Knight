@@ -1,4 +1,4 @@
-﻿import * as THREE from 'three';
+import * as THREE from 'three';
 import { SceneManager } from './gfx/SceneManager.js';
 import { ChessBoard3D } from './gfx/ChessBoard3D.js';
 import { ProceduralTextureGenerator } from './gfx/ProceduralTextureGenerator.js';
@@ -105,7 +105,7 @@ class GameApp {
     });
     this.ui.btnHudSound.addEventListener('click', (e) => {
       e.stopPropagation();
-      this.ui.btnHudSound.textContent = this.sound.toggleSound() ? 'ðŸ”Š' : 'ðŸ”‡';
+      this.ui.btnHudSound.textContent = this.sound.toggleSound() ? '🔊' : '🔇';
     });
     this.ui.btnRestartGame.addEventListener('click', () => {
       this.startNewGame(this.gameMode);
@@ -135,10 +135,6 @@ class GameApp {
       }
     };
     dom.addEventListener('pointerdown', handler);
-    dom.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      handler(e.touches[0]);
-    }, { passive: false });
   }
 
   handleSquareClick(sq) {
@@ -226,7 +222,7 @@ class GameApp {
     this.isAnimating = true;
     this.tomUI.hideSpeech();
     this.tomUI.setHintButtonVisible(false);
-    this.tomUI.showMessage("Tom's turn... calculating... ðŸ§ ", 1500);
+    this.tomUI.showMessage("Tom's turn... calculating... 🧠", 1500);
     const move = await this.bot.calculateBestMove(this.engine.game);
     this.isAnimating = false;
     if (move) this.executeMove(move.from, move.to, move.promotion || 'q');
@@ -284,11 +280,11 @@ class GameApp {
   setupTomEvents() {
     this.tomUI.onHintClick(async () => {
       if (this.engine.isGameOver()) {
-        this.tomUI.showMessage("Game's over fam! No more moves to hint! ðŸŽ¬");
+        this.tomUI.showMessage("Game's over fam! No more moves to hint! 🎬");
         return;
       }
       this.tomUI.setHintButtonVisible(false);
-      this.tomUI.showMessage("Tom's thinking... ðŸ¤”", 1500);
+      this.tomUI.showMessage("Tom's thinking... 🤔", 1500);
       setTimeout(async () => {
         const hint = await this.tom.getBestMoveHint(this.engine.game, this.bot);
         this.tomUI.showHint(hint);
@@ -305,7 +301,7 @@ class GameApp {
       } else if (this.gameMode === 'bot' && !this.engine.isGameOver()) {
         const vis = !this.tomUI.hintBtn.classList.contains('hidden');
         this.tomUI.setHintButtonVisible(!vis);
-        if (!vis) this.tomUI.showMessage("Click the button for a spicy hint! ðŸŒ¶ï¸", 2500);
+        if (!vis) this.tomUI.showMessage("Click the button for a spicy hint! 🌶️", 2500);
       }
     });
   }
@@ -316,9 +312,9 @@ class GameApp {
   }
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------- 
 // Error Boundary
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------- 
 window.addEventListener('error', (event) => {
   console.error('Error:', event.error || event.message);
   const el = document.getElementById('app');
@@ -326,13 +322,13 @@ window.addEventListener('error', (event) => {
     const ov = document.createElement('div');
     ov.id = 'error-overlay';
     ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#090c10;color:#f8fafc;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;font-family:sans-serif;text-align:center';
-    ov.innerHTML = '<div style="font-size:48px;margin-bottom:16px">âš ï¸</div><h2 style="color:#f59e0b;margin-bottom:8px">Something went wrong</h2><p style="color:#94a3b8;margin-bottom:20px;max-width:400px">The app will reload automatically.</p><button onclick="location.reload()" style="background:#06b6d4;color:white;border:none;padding:12px 32px;border-radius:12px;font-size:16px;cursor:pointer">Reload App</button><p style="color:#64748b;font-size:11px;margin-top:16px">' + (event.message || 'Unknown error') + '</p>';
+    ov.innerHTML = '<div style="font-size:48px;margin-bottom:16px">⚠️</div><h2 style="color:#f59e0b;margin-bottom:8px">Something went wrong</h2><p style="color:#94a3b8;margin-bottom:20px;max-width:400px">The app will reload automatically.</p><button onclick="location.reload()" style="background:#06b6d4;color:white;border:none;padding:12px 32px;border-radius:12px;font-size:16px;cursor:pointer">Reload App</button><p style="color:#64748b;font-size:11px;margin-top:16px">' + (event.message || 'Unknown error') + '</p>';
     el.appendChild(ov);
   }
   event.preventDefault();
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------- 
 // Service Worker
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 if ('serviceWorker' in navigator) {
