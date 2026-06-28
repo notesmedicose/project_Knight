@@ -1,3 +1,5 @@
+import { AdMob, BannerAdSize, BannerAdPosition } from '@capacitor-community/admob';
+
 /**
  * AdManager handles AdMob Banner Ads integration.
  * ONLY Banner Ads, NO Fullscreen/Interstitial Ads.
@@ -18,7 +20,6 @@ export class AdManager {
   async initialize() {
     try {
       if (window.Capacitor && window.Capacitor.isPluginAvailable('AdMob')) {
-        const { AdMob, BannerAdSize, BannerAdPosition } = await import(/* @vite-ignore */ '@capacitor-community/admob');
         await AdMob.initialize({
           requestTrackingAuthorization: false,
           testingDevices: this._isProduction ? [] : ['EMULATOR'],
