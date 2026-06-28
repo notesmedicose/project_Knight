@@ -29,6 +29,10 @@ export class ChessBoard3D {
     this.createBoardMesh();
   }
 
+  getAllTileMeshes() {
+    return Object.values(this.tiles);
+  }
+
   /**
    * Handle connectivity changes for adaptive texture resolution
    */
