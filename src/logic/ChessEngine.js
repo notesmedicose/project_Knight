@@ -41,11 +41,17 @@ export class ChessEngine {
     return this.game.moves({ square, verbose: true }).map(m => m.to);
   }
 
-  makeMove(from, to, promotion = 'q') {
+  makeMove(from, to, promotion = null) {
     try {
-      const move = this.game.move({ from, to, promotion });
-      return move;
+      const movePayload = { from, to };
+      const piece = this.game.get(from);
+      const isPromo = piece && piece.type === 'p' && (to[1] === '8' || to[1] === '1');
+      if (isPromo) {
+        movePayload.promotion = promotion || 'q';
+      }
+      return this.game.move(movePayload);
     } catch (e) {
+      console.warn('makeMove error:', e.message);
       return null;
     }
   }

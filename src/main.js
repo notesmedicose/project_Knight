@@ -7,8 +7,6 @@ import { BotAI } from './logic/BotAI.js';
 import { SoundManager } from './audio/SoundManager.js';
 import { UIManager } from './ui/UIManager.js';
 import { AdManager } from './ads/AdManager.js';
-import { TalkingTom } from './logic/TalkingTom.js';
-import { TomUI } from './ui/TomUI.js';
 
 class GameApp {
   constructor() {
@@ -22,8 +20,6 @@ class GameApp {
     this.sound = new SoundManager();
     this.ui = new UIManager();
     this.ads = new AdManager();
-    this.tom = new TalkingTom('bot');
-    this.tomUI = new TomUI();
     this.init();
   }
 
@@ -32,7 +28,6 @@ class GameApp {
     this.board3D.syncBoardState(this.engine.getBoard());
     this.setupUIEvents();
     this.setupInputEvents();
-    this.setupTomEvents();
     this.animate();
     this.ads.enableProduction();
     await this.ads.initialize();
@@ -159,7 +154,7 @@ class GameApp {
       if (promo) {
         this.ui.showPromotionModal((t) => this.executeMove(from, sq, t));
       } else {
-        this.executeMove(from, sq, 'q');
+        this.executeMove(from, sq, null);
       }
     } else {
       this.board3D.setSelectedSquare(null);
@@ -167,7 +162,7 @@ class GameApp {
     }
   }
 
-  executeMove(from, to, promo = 'q') {
+  executeMove(from, to, promo = null) {
     this.isAnimating = true;
     this.board3D.setSelectedSquare(null);
     this.board3D.clearHighlights();
@@ -186,23 +181,8 @@ class GameApp {
         const chk = this.engine.inCheck();
         if (chk) this.sound.playCheck();
         if (userMove) {
-          const ev = this.tom.evaluateMove(this.engine.game, from, to, promo);
-          this.tomUI.bounce();
           if (this.engine.isCheckmate()) { this.checkGameOver(); return; }
           else if (this.engine.isDraw()) { this.checkGameOver(); return; }
-          else if (chk && isCap) {
-            this.tomUI.showMessage(this.tom.getMotivationalMessage('capture'), 3000);
-            setTimeout(() => this.tomUI.showMessage(this.tom.getMotivationalMessage('check'), 3000), 3200);
-          } else if (chk) {
-            this.tomUI.showMessage(this.tom.getMotivationalMessage('check'), 3000);
-          } else if (isCap) {
-            this.tomUI.showMessage(this.tom.getMotivationalMessage('capture'), 3000);
-          } else {
-            this.tomUI.showMessage(this.tom.getMotivationalMessage('move', ev.quality), 3000);
-          }
-          if (this.gameMode === 'bot' && !this.engine.isGameOver()) {
-            this.tomUI.setHintButtonVisible(true);
-          }
         }
         if (!userMove && (this.engine.isCheckmate() || this.engine.isDraw())) {
           this.checkGameOver();
@@ -220,36 +200,19 @@ class GameApp {
 
   async triggerBotMove() {
     this.isAnimating = true;
-    this.tomUI.hideSpeech();
-    this.tomUI.setHintButtonVisible(false);
-    this.tomUI.showMessage("Tom's turn... calculating... 🧠", 1500);
     const move = await this.bot.calculateBestMove(this.engine.game);
     this.isAnimating = false;
-    if (move) this.executeMove(move.from, move.to, move.promotion || 'q');
+    if (move) this.executeMove(move.from, move.to, move.promotion);
   }
 
   checkGameOver() {
     if (!this.engine.isGameOver()) return false;
     this.sound.playGameOver();
-    this.tomUI.setHintButtonVisible(false);
-    this.tomUI.hideSpeech();
     if (this.engine.isCheckmate()) {
       const w = this.engine.turn() === 'w' ? 'Black' : 'White';
       this.ui.showGameOver('CHECKMATE!', w + ' Wins the Game!');
-      if (this.gameMode === 'bot') {
-        const win = w.toLowerCase() !== this.playerColor;
-        setTimeout(() => {
-          if (win) {
-            this.tomUI.showMessage(this.tom.getMotivationalMessage('checkmate'), 6000);
-            this.tomUI.bounce();
-          } else {
-            this.tomUI.showMessage(this.tom.getMotivationalMessage('gameover_loss'), 5000);
-          }
-        }, 600);
-      }
     } else if (this.engine.isDraw()) {
       this.ui.showGameOver('DRAW!', 'The game ended in a draw.');
-      setTimeout(() => this.tomUI.showMessage(this.tom.getMotivationalMessage('gameover_draw'), 5000), 600);
     }
     return true;
   }
@@ -267,43 +230,9 @@ class GameApp {
     this.ui.showGameHUD(mode, this.playerColor);
     this.ui.updateTurn('w', false);
     this.ui.updateCapturedPieces([]);
-    this.tom.setGameMode(mode);
-    this.tomUI.setGameModeVisual(mode);
-    this.tomUI.hideSpeech();
-    this.tomUI.setHintButtonVisible(false);
-    setTimeout(() => this.tomUI.showMessage(this.tom.getWelcomeMessage(), 4000), 500);
     if (mode === 'bot' && this.playerColor === 'b') {
       setTimeout(() => this.triggerBotMove(), 400);
     }
-  }
-
-  setupTomEvents() {
-    this.tomUI.onHintClick(async () => {
-      if (this.engine.isGameOver()) {
-        this.tomUI.showMessage("Game's over fam! No more moves to hint! 🎬");
-        return;
-      }
-      this.tomUI.setHintButtonVisible(false);
-      this.tomUI.showMessage("Tom's thinking... 🤔", 1500);
-      setTimeout(async () => {
-        const hint = await this.tom.getBestMoveHint(this.engine.game, this.bot);
-        this.tomUI.showHint(hint);
-        this.tomUI.bounce();
-        setTimeout(() => {
-          if (!this.engine.isGameOver()) this.tomUI.setHintButtonVisible(true);
-        }, 4000);
-      }, 600);
-    });
-    this.tomUI.onAvatarClick(() => {
-      if (this.gameMode === 'friend' && !this.engine.isGameOver()) {
-        this.tomUI.setHintButtonVisible(true);
-        this.tomUI.showMessage(this.tom.getFriendHintOffer(), 3000);
-      } else if (this.gameMode === 'bot' && !this.engine.isGameOver()) {
-        const vis = !this.tomUI.hintBtn.classList.contains('hidden');
-        this.tomUI.setHintButtonVisible(!vis);
-        if (!vis) this.tomUI.showMessage("Click the button for a spicy hint! 🌶️", 2500);
-      }
-    });
   }
 
   animate() {
