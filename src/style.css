@@ -592,7 +592,7 @@ body, html {
 
 /* Modals */
 .modal-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 200;
   background: rgba(0, 0, 0, 0.75);
@@ -609,7 +609,6 @@ body, html {
   text-align: center;
 }
 
-/* Privacy panel scrolling */
 .privacy-panel { max-height: 80vh; display: flex; flex-direction: column; }
 .privacy-scroll {
   overflow-y: auto;
@@ -617,20 +616,6 @@ body, html {
   text-align: left;
   font-size: 13px;
   padding-right: 4px;
-}
-.privacy-scroll p { margin-bottom: 10px; color: var(--text-secondary); line-height: 1.6; }
-.privacy-scroll a { color: var(--accent-cyan); word-break: break-all; }
-
-.modal-panel h2 {
-  font-family: var(--font-heading);
-  margin-bottom: 8px;
-  color: var(--accent-gold);
-}
-
-.modal-panel p {
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin-bottom: 20px;
 }
 
 .promotion-options {
